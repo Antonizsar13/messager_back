@@ -1,0 +1,4 @@
+mysql/db/*
+!mysql/db/.gitkeep
+
+nginx/nginx.conf

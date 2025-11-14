@@ -1,0 +1,27 @@
+services:
+  nginx:
+    image: "nginx:stable-alpine"
+    ports:
+      - "8000:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./app:/var/www/messager
+
+  php:
+    build:
+      context: docker/php
+      dockerfile: Dockerfile
+    volumes:
+      - ./app:/var/www/messager
+
+  mysql:
+    image: mysql:9.4
+    ports:
+      - "127.0.0.1:3306:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:?error}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?error}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?error}
+      MYSQL_USER: ${DB_USER:?error}
+    volumes:
+      - ./docker/mysql/db:/var/lib/mysql
