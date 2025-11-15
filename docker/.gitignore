@@ -1,4 +1,7 @@
 mysql/db/*
 !mysql/db/.gitkeep
 
+minio/data/*
+!minio/data/.gitkeep
+
 nginx/nginx.conf
