@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\BucketName;
 use App\Enums\TypeFile;
+use App\Http\Resources\UserResource;
 use App\Models\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -51,15 +52,6 @@ class UserController extends Controller
     {
         $user = Auth::user();
 
-        $avatars = $user->avatars()->get();
-        $avatarsArray = $user->avatars_array;
-
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'phone' => $user->phone,
-            'created_at' => $user->created_at,
-            'avatars' => $avatarsArray,
-        ]);
+        return new UserResource($user);
     }
 }

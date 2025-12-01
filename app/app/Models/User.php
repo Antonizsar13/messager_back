@@ -75,4 +75,26 @@ class User extends Authenticatable implements OAuthenticatable
             ];
         });
     }
+
+    public function chats()
+    {
+        return $this->belongsToMany(Chat::class, 'chat_user')
+            ->withPivot('role', 'last_read_message_id', 'joined_at', 'left_at')
+            ->withTimestamps();
+    }
+
+    public function chatUsers()
+    {
+        return $this->hasMany(ChatUser::class);
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
+
+    public function messageStatuses()
+    {
+        return $this->hasMany(MessageStatus::class);
+    }
 }
