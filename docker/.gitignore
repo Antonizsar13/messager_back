@@ -5,3 +5,5 @@ minio/data/*
 !minio/data/.gitkeep
 
 nginx/nginx.conf
+
+echo_server/laravel-echo-server.json

@@ -37,3 +37,39 @@ services:
     volumes:
       - ./docker/minio/data:/data
     command: server /data --console-address ":9001"
+
+#  echo-server:
+#    build:
+#      context: docker/echo_server
+#      dockerfile: Dockerfile
+#    container_name: echo-server
+#    ports:
+#      - "6001:6001"
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+#  soketi:
+#    build:
+#      context: docker/soketi
+#      dockerfile: Dockerfile
+#    container_name: soketi
+#    ports:
+#       - '6001:6001'
+#       - '9601:9601'
+
+  socket-server:
+    build:
+      context: docker/socket-server
+      dockerfile: Dockerfile
+    container_name: socket-server
+    depends_on:
+      - redis
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "6001:6001"

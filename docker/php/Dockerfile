@@ -14,7 +14,10 @@ RUN apk --no-cache add \
     ca-certificates \
     nodejs \
     npm \
+    $PHPIZE_DEPS \
     && docker-php-ext-install pdo pdo_mysql \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && usermod -u 1000 www-data \
     && groupmod -g 1000 www-data
 
