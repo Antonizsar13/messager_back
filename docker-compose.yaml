@@ -14,6 +14,16 @@ services:
     volumes:
       - ./app:/var/www/messager
 
+  queue-worker:
+    build:
+      context: docker/supervisor
+      dockerfile: Dockerfile
+    container_name: queue-worker
+    volumes:
+      - ./app:/var/www/messager
+    depends_on:
+      - php
+
   mysql:
     image: mysql:9.4
     ports:
@@ -38,38 +48,25 @@ services:
       - ./docker/minio/data:/data
     command: server /data --console-address ":9001"
 
-#  echo-server:
-#    build:
-#      context: docker/echo_server
-#      dockerfile: Dockerfile
-#    container_name: echo-server
-#    ports:
-#      - "6001:6001"
-
   redis:
     image: redis:7-alpine
     container_name: redis
     ports:
       - "6379:6379"
 
-#  soketi:
-#    build:
-#      context: docker/soketi
-#      dockerfile: Dockerfile
-#    container_name: soketi
-#    ports:
-#       - '6001:6001'
-#       - '9601:9601'
-
-  socket-server:
-    build:
-      context: docker/socket-server
-      dockerfile: Dockerfile
-    container_name: socket-server
-    depends_on:
-      - redis
+  soketi:
+    image: 'quay.io/soketi/soketi:latest-16-alpine'
     environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      SOKETI_DEBUG: '1'
+      SOKETI_METRICS_SERVER_PORT: '9601'
+      SOKETI_DEFAULT_APP_ID:  ${SOKETI_DEFAULT_APP_ID:?error}
+      SOKETI_DEFAULT_APP_KEY:  ${SOKETI_DEFAULT_APP_KEY:?error}
+      SOKETI_DEFAULT_APP_SECRET: ${SOKETI_DEFAULT_APP_SECRET:?error}
+      SOKETI_DEFAULT_APP_ENABLE_CLIENT_MESSAGES: "true"
+
+      SOKETI_DEFAULT_APP_PING_INTERVAL: '25000'   # отправка пинга каждые 25 секунд
+      SOKETI_DEFAULT_APP_PING_TIMEOUT: '60000'    # ожидание пинга 60 секунд
+      SOKETI_DEFAULT_APP_CLIENT_TIMEOUT: '600000' # 10 минут без активности1
     ports:
-      - "6001:6001"
+      - '6001:6001'
+      - '9601:9601'

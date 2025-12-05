@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Enums\BucketName;
-use App\Enums\MessageType;
 use App\Enums\TypeFile;
+use App\Events\Chat\NewMessage;
 use App\Http\Resources\MessageResource;
 use App\Models\Chat;
-use App\Models\File;
 use App\Models\Message;
 use App\Models\MessageStatus;
 use Illuminate\Http\Request;
@@ -68,7 +67,7 @@ class MessageController extends Controller
             'reply_to' => $request->reply_to,
         ]);
 
-        $fileIds = $request->input('files', []); // получаем массив ID файлов
+        $fileIds = $request->input('files', []);
         if (!empty($fileIds)) {
             $files = Auth::user()->files()->whereIn('id', $fileIds)->get();
 
@@ -77,6 +76,8 @@ class MessageController extends Controller
                 $file->save();
             }
         }
+        event(new \App\Events\Message\MessageSent($message));
+        event(new NewMessage($message, $chat->users()->pluck('users.id')->toArray()));
 
         return new MessageResource($message->load(['user', 'files', 'replyToMessage']));
     }
@@ -172,6 +173,12 @@ class MessageController extends Controller
                 ]
             );
         });
+
+        event(new \App\Events\Message\MessageRead(
+            $message->chat_id,
+            $message->id,
+            Auth::id()
+        ));
 
         return response()->json(['message' => 'Marked as read']);
     }

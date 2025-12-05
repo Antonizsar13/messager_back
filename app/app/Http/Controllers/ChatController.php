@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ChatType;
 use App\Enums\ChatUserRole;
+use App\Events\Chat\ChatCreated;
 use App\Http\Resources\ChatResource;
 use App\Http\Resources\UserResource;
 use App\Models\Chat;
@@ -111,6 +112,10 @@ class ChatController extends Controller
                 $id => ['role' => ChatUserRole::MEMBER->value]
             ])
         );
+
+        $usersId = $request->users;
+        array_push($usersId, Auth::id());
+        event(new ChatCreated($chat, $usersId));
 
         $createsRole = ChatUserRole::MEMBER;
         if (count($request->users) > 1) {
