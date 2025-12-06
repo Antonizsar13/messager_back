@@ -38,26 +38,42 @@ class ChatController extends Controller
     }
 
     /**
-     * @lrd:start
-     * # Список всех чатов пользователя
-     * Возвращает все чаты, в которых участвует текущий пользователь.
-     * @lrd:end
-     * @LRDresponses 200 Возвращает список чатов с последним сообщением
-     */
-    public function index()
+    * @lrd:start
+    * # Список всех чатов пользователя
+    * Возвращает все чаты, в которых участвует текущий пользователь, с пагинацией через offset и limit
+    * @lrd:end
+    * @LRDparam offset int nullable Смещение, с которого начинать выборку, по умолчанию 0
+    * @LRDparam limit int nullable Количество чатов для выборки, по умолчанию 20
+    * @LRDresponses 200 Возвращает список чатов с последним сообщением
+    */
+    public function index(Request $request)
     {
         $userId = Auth::id();
+        $offset = (int) $request->get('offset', 0);
+        $limit = (int) $request->get('limit', 20);
 
-        $chats = Chat::whereHas('users', fn($q) => $q->where('user_id', $userId))
+        $query = Chat::whereHas('users', fn($q) => $q->where('user_id', $userId))
             ->with([
                 'users',
                 'avatar',
                 'messages' => fn($q) => $q->latest()->take(1)
             ])
-            ->orderBy('updated_at', 'desc')
-            ->paginate(20);
+            ->orderBy('updated_at', 'desc');
 
-        return ChatResource::collection($chats);
+        $total = $query->count();
+
+        $chats = $query->offset($offset)
+            ->limit($limit)
+            ->get();
+
+        return response()->json([
+            'data' => ChatResource::collection($chats),
+            'meta' => [
+                'offset' => $offset,
+                'limit' => $limit,
+                'total' => $total,
+            ]
+        ]);
     }
 
     /**

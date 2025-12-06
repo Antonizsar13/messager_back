@@ -17,7 +17,9 @@ class ChatResource extends JsonResource
             'avatar' => $this->avatar
                 ? new FileResource($this->avatar)
                 : null,
-            'users' => UserResource::collection($this->whenLoaded('users')),
+            'users_id' => $this->whenLoaded('users', function () {
+                return $this->users->pluck('id');
+            }),
             'messages' => MessageResource::collection($this->whenLoaded('messages')),
         ];
     }

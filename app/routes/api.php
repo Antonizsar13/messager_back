@@ -11,9 +11,10 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::middleware('auth:api')->group(function () {
-    Route::post('/user/avatar', [UserController::class, 'uploadAvatar']);
-
-    Route::get('/user/profile', [UserController::class, 'profile']);
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users/avatar', [UserController::class, 'uploadAvatar']);
+    Route::get('/users/{user}', [UserController::class, 'show']);
+    Route::get('/users/profile', [UserController::class, 'profile']);
 
     Route::get('/chats', [ChatController::class, 'index']);
     Route::post('/chats', [ChatController::class, 'store']);

@@ -17,7 +17,9 @@ class MessageResource extends JsonResource
         return [
             'id'        => $this->id,
             'chat_id'   => $this->chat_id,
-            'user'      => new UserResource($this->whenLoaded('user')),
+            'user_id' => $this->whenLoaded('user', function () {
+                return $this->user->id;
+            }),
             'type'      => $this->type,
             'message'   => $this->message,
             'meta'      => $this->meta,

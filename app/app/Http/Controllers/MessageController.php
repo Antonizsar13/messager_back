@@ -20,19 +20,35 @@ class MessageController extends Controller
     /**
      * @lrd:start
      * # Список сообщений чата
-     * Возвращает последние 50 сообщений с пагинацией
+     * Возвращает сообщения чата с пагинацией через offset и limit
      * @lrd:end
+     * @LRDparam offset int nullable Смещение, с которого начинать выборку, по умолчанию 0
+     * @LRDparam limit int nullable Количество сообщений для выборки, по умолчанию 20
      * @LRDresponses 200 Список сообщений
      * @LRDresponses 404 Чат не найден
      */
-    public function index(Chat $chat)
+    public function index(Chat $chat, Request $request)
     {
-        $messages = $chat->messages()
-            ->with(['user', 'files', 'replyToMessage'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(50);
+        $offset = (int) $request->get('offset', 0);
+        $limit = (int) $request->get('limit', 20);
 
-        return MessageResource::collection($messages);
+        $query = $chat->messages()->with(['user', 'files', 'replyToMessage'])
+            ->orderBy('created_at', 'desc');
+
+        $total = $query->count();
+
+        $messages = $query->offset($offset)
+            ->limit($limit)
+            ->get();
+
+        return response()->json([
+            'data' => MessageResource::collection($messages),
+            'meta' => [
+                'offset' => $offset,
+                'limit' => $limit,
+                'total' => $total,
+            ]
+        ]);
     }
 
     /**
